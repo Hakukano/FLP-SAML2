@@ -1,12 +1,11 @@
-use crate::sp::ServiceProvider;
 use chrono::{Duration, SecondsFormat, Utc};
 use quick_xml::se::to_string as to_xml_string;
 use serde::Serialize;
 
-use crate::get_cert_data;
+use crate::{get_cert_data, sp::ServiceProvider};
 
 #[derive(Serialize)]
-struct AssertionConsumerService {
+pub struct AssertionConsumerService {
     #[serde(rename = "Binding")]
     binding: String,
     #[serde(rename = "Location")]
@@ -15,7 +14,7 @@ struct AssertionConsumerService {
 }
 
 #[derive(Serialize)]
-struct SingleLogoutService {
+pub struct SingleLogoutService {
     #[serde(rename = "Binding")]
     binding: String,
     #[serde(rename = "Location")]
@@ -23,19 +22,19 @@ struct SingleLogoutService {
 }
 
 #[derive(Serialize)]
-struct X509Certificate {
+pub struct X509Certificate {
     #[serde(rename = "$value")]
     value: String,
 }
 
 #[derive(Serialize)]
-struct X509Data {
+pub struct X509Data {
     #[serde(rename = "ds:X509Certificate")]
     x509_certificate: X509Certificate,
 }
 
 #[derive(Serialize)]
-struct KeyInfo {
+pub struct KeyInfo {
     #[serde(rename = "xmlns:ds")]
     ds: String,
     #[serde(rename = "ds:X509Data")]
@@ -43,7 +42,7 @@ struct KeyInfo {
 }
 
 #[derive(Serialize)]
-struct KeyDescriptor {
+pub struct KeyDescriptor {
     #[serde(rename = "use")]
     us: String,
     #[serde(rename = "ds:KeyInfo")]
@@ -51,7 +50,7 @@ struct KeyDescriptor {
 }
 
 #[derive(Serialize)]
-struct SPSSODescriptor {
+pub struct SPSSODescriptor {
     #[serde(rename = "protocolSupportEnumeration")]
     protocol_support_enumeration: String,
     #[serde(rename = "md:KeyDescriptor")]
@@ -64,7 +63,7 @@ struct SPSSODescriptor {
 
 #[derive(Serialize)]
 #[serde(rename = "md:EntityDescriptor")]
-struct EntityDescriptor {
+pub struct EntityDescriptor {
     #[serde(rename = "xmlns:md")]
     md: String,
     #[serde(rename = "xmlns:ds")]

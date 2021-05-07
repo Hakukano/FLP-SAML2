@@ -2,6 +2,7 @@ use openssl::{error::ErrorStack, pkey::Private, rsa::Rsa, x509::X509};
 use std::{fmt, fs::read, io, path::Path};
 use url::Url;
 
+pub mod authn_redirect;
 pub mod metadata;
 
 #[derive(Debug)]
@@ -18,6 +19,8 @@ impl fmt::Display for Error {
         }
     }
 }
+
+impl std::error::Error for Error {}
 
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Self {
@@ -40,6 +43,8 @@ pub struct ServiceProvider {
     pub certificate: X509,
     pub assert_login: Url,
     pub assert_logout: Url,
+    pub name_id_format: Option<String>,
+    pub authn_context: Option<authn_redirect::RequestedAuthnContext>,
 }
 
 impl ServiceProvider {
@@ -56,6 +61,21 @@ impl ServiceProvider {
             certificate: X509::from_pem(read(certificate_path)?.as_slice())?,
             assert_login,
             assert_logout,
+            name_id_format: None,
+            authn_context: None,
         })
+    }
+
+    pub fn with_name_id_format(mut self, name_id_format: String) -> Self {
+        self.name_id_format = Some(name_id_format);
+        self
+    }
+
+    pub fn with_auth_context(
+        mut self,
+        auth_context: authn_redirect::RequestedAuthnContext,
+    ) -> Self {
+        self.authn_context = Some(auth_context);
+        self
     }
 }
