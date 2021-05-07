@@ -1,45 +1,15 @@
 use openssl::{
-    error::ErrorStack,
     pkey::{PKey, Private},
     rsa::Rsa,
     x509::X509,
 };
-use std::{fmt, fs::read, io, path::Path};
+use std::{fs::read, path::Path};
 use url::Url;
+
+use crate::error::Result;
 
 pub mod authn_redirect;
 pub mod metadata;
-
-#[derive(Debug)]
-pub enum Error {
-    IOError(String),
-    InvalidCert(String),
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self {
-            Self::IOError(s) => write!(f, "Cannot create SP: {}", s),
-            Self::InvalidCert(s) => write!(f, "Cannot create SP: {}", s),
-        }
-    }
-}
-
-impl std::error::Error for Error {}
-
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Self {
-        Self::IOError(err.to_string())
-    }
-}
-
-impl From<ErrorStack> for Error {
-    fn from(err: ErrorStack) -> Self {
-        Self::InvalidCert(err.to_string())
-    }
-}
-
-pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Clone, Debug)]
 pub struct ServiceProvider {

@@ -7,10 +7,7 @@ use serde::Serialize;
 use std::io::Read;
 use url::Url;
 
-use crate::{
-    idp::IdentityProvider,
-    sp::{Result, ServiceProvider},
-};
+use crate::{error::Result, idp::IdentityProvider, sp::ServiceProvider};
 
 #[derive(Clone, Debug, Serialize)]
 pub struct AuthnContextClassRef {

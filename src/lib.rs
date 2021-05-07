@@ -2,6 +2,7 @@ use lazy_static::lazy_static;
 use openssl::x509::X509;
 use regex::Regex;
 
+pub mod error;
 pub mod idp;
 pub mod sp;
 
