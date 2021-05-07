@@ -13,12 +13,13 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+base64 = "0.13"
 chrono = "0.4"
 flate2 = "1.0"
 hex = "0.4"
 lazy_static = "1.4"
 openssl = "0.10"
-quick-xml = { version = "0.22", features = ["serialize"] }
+quick-xml = { version = "0.22", features = [ "serialize" ] }
 rand = "0.8"
 regex = "1.4"
 serde = { version = "1.0", features = [ "derive" ] }
