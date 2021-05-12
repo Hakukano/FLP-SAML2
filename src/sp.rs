@@ -9,6 +9,7 @@ use url::Url;
 use crate::error::Result;
 
 pub mod authn_redirect;
+pub mod logout_redirect;
 pub mod metadata;
 
 #[derive(Clone, Debug)]

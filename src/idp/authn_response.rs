@@ -1,7 +1,11 @@
+use openssl::x509::X509;
 use quick_xml::de::from_str as from_xml_str;
 use serde::Deserialize;
 
-use crate::{error::Result, idp::IdentityProvider};
+use crate::{
+    error::{Error, Result},
+    idp::IdentityProvider,
+};
 
 #[derive(Deserialize)]
 pub struct AttributeValue {
@@ -276,8 +280,29 @@ pub struct Response {
 
 impl IdentityProvider {
     pub fn authn_response(&self, xml: &str) -> Result<Response> {
-        let response = from_xml_str(xml)?;
-
+        let response = from_xml_str::<Response>(xml)?;
+        if let Some(signature) = response.signature.as_ref() {
+            let cert = X509::from_pem(
+                signature
+                    .key_info
+                    .x509_data
+                    .x509_certificate
+                    .value
+                    .as_bytes(),
+            )?;
+            let mut is_valid = false;
+            for public_key in self.certificates.iter() {
+                if cert.verify(public_key.public_key()?.as_ref())? {
+                    is_valid = true;
+                    break;
+                }
+            }
+            if !is_valid {
+                return Err(Error::InvalidCert(
+                    "SAML response contains invalid cert".into(),
+                ));
+            }
+        }
         Ok(response)
     }
 }

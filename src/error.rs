@@ -14,6 +14,7 @@ impl fmt::Display for Error {
         match &self {
             Self::IOError(s) => write!(f, "Cannot create SP: {}", s),
             Self::InvalidCert(s) => write!(f, "Cannot create SP: {}", s),
+            Self::InvalidResponse(s) => write!(f, "Cannot create SP: {}", s),
         }
     }
 }
