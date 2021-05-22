@@ -15,15 +15,19 @@ pub struct IdentityProvider {
 }
 
 impl IdentityProvider {
-    pub fn new(login: Url, logout: Url, certificate_paths: &[&Path]) -> Result<Self> {
+    pub fn new(login: Url, logout: Url, certificates: Vec<X509>) -> Self {
+        Self {
+            login,
+            logout,
+            certificates,
+        }
+    }
+
+    pub fn new_from_files(login: Url, logout: Url, certificate_paths: &[&Path]) -> Result<Self> {
         let mut certificates = Vec::with_capacity(certificate_paths.len());
         for certificate_path in certificate_paths {
             certificates.push(X509::from_pem(read(certificate_path)?.as_slice())?);
         }
-        Ok(Self {
-            login,
-            logout,
-            certificates,
-        })
+        Ok(Self::new(login, logout, certificates))
     }
 }

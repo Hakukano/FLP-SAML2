@@ -27,23 +27,39 @@ pub struct ServiceProvider {
 impl ServiceProvider {
     pub fn new(
         entity_id: Url,
-        private_key_path: &Path,
-        certificate_path: &Path,
+        private_key: PKey<Private>,
+        certificate: X509,
         assert_login: Url,
         assert_logout: Url,
-    ) -> Result<Self> {
-        Ok(Self {
+    ) -> Self {
+        Self {
             entity_id,
-            private_key: PKey::from_rsa(Rsa::private_key_from_pem(
-                read(private_key_path)?.as_slice(),
-            )?)?,
-            certificate: X509::from_pem(read(certificate_path)?.as_slice())?,
+            private_key,
+            certificate,
             assert_login,
             assert_logout,
             relay_state: None,
             name_id_format: None,
             authn_context: None,
-        })
+        }
+    }
+
+    pub fn new_from_files(
+        entity_id: Url,
+        private_key_path: &Path,
+        certificate_path: &Path,
+        assert_login: Url,
+        assert_logout: Url,
+    ) -> Result<Self> {
+        Ok(Self::new(
+            entity_id,
+            PKey::from_rsa(Rsa::private_key_from_pem(
+                read(private_key_path)?.as_slice(),
+            )?)?,
+            X509::from_pem(read(certificate_path)?.as_slice())?,
+            assert_login,
+            assert_logout,
+        ))
     }
 
     pub fn with_relay_state(mut self, relay_state: String) -> Self {
