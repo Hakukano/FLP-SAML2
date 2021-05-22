@@ -91,7 +91,7 @@ impl ServiceProvider {
         let mut deflated = Vec::new();
         deflater.read_to_end(&mut deflated)?;
         let saml_request = base64::encode(deflated);
-        let mut url = idp.login.clone();
+        let mut url = idp.logout.clone();
         url.query_pairs_mut()
             .clear()
             .append_pair("SAMLRequest", &saml_request);
