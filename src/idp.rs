@@ -5,6 +5,7 @@ use url::Url;
 use crate::error::Result;
 
 pub mod authn_response;
+pub mod logout_response;
 
 #[derive(Clone, Debug)]
 pub struct IdentityProvider {
