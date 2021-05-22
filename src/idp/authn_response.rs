@@ -1,6 +1,8 @@
+use flate2::read::DeflateDecoder;
 use openssl::x509::X509;
 use quick_xml::de::from_str as from_xml_str;
 use serde::Deserialize;
+use std::io::Read;
 
 use crate::{
     error::{Error, Result},
@@ -21,13 +23,13 @@ pub struct Attribute {
     pub name: String,
     #[serde(rename = "NameFormat")]
     pub name_format: String,
-    #[serde(rename = "saml:AttributeValue")]
+    #[serde(rename = "AttributeValue")]
     pub attribute_values: Vec<AttributeValue>,
 }
 
 #[derive(Deserialize)]
 pub struct AttributeStatement {
-    #[serde(rename = "saml:Attribute")]
+    #[serde(rename = "Attribute")]
     pub attributes: Vec<Attribute>,
 }
 
@@ -39,7 +41,7 @@ pub struct AuthnContextClassRef {
 
 #[derive(Deserialize)]
 pub struct AuthnContext {
-    #[serde(rename = "saml:AuthnContextClassRef")]
+    #[serde(rename = "AuthnContextClassRef")]
     pub authn_context_class_ref: AuthnContextClassRef,
 }
 
@@ -51,7 +53,7 @@ pub struct AuthnStatement {
     pub session_not_on_or_after: String,
     #[serde(rename = "SessionIndex")]
     pub session_index: String,
-    #[serde(rename = "saml:AuthnContext")]
+    #[serde(rename = "AuthnContext")]
     pub authn_context: AuthnContext,
 }
 
@@ -63,7 +65,7 @@ pub struct Audience {
 
 #[derive(Deserialize)]
 pub struct AudienceRestriction {
-    #[serde(rename = "saml:Audience")]
+    #[serde(rename = "Audience")]
     pub audience: Audience,
 }
 
@@ -73,7 +75,7 @@ pub struct Conditions {
     pub not_before: String,
     #[serde(rename = "NotOnOrAfter")]
     pub not_on_or_after: String,
-    #[serde(rename = "saml:AudienceRestriction")]
+    #[serde(rename = "AudienceRestriction")]
     pub audience_restriction: AudienceRestriction,
 }
 
@@ -91,7 +93,7 @@ pub struct SubjectConfirmationData {
 pub struct SubjectConfirmation {
     #[serde(rename = "Method")]
     pub method: String,
-    #[serde(rename = "saml:SubjectConfirmationData")]
+    #[serde(rename = "SubjectConfirmationData")]
     pub subject_confirmation_data: SubjectConfirmationData,
 }
 
@@ -107,9 +109,9 @@ pub struct NameID {
 
 #[derive(Deserialize)]
 pub struct Subject {
-    #[serde(rename = "saml:NameID")]
+    #[serde(rename = "NameID")]
     pub name_id: NameID,
-    #[serde(rename = "saml:SubjectConfirmation")]
+    #[serde(rename = "SubjectConfirmation")]
     pub subject_confirmation: SubjectConfirmation,
 }
 
@@ -121,7 +123,7 @@ pub struct StatusCode {
 
 #[derive(Deserialize)]
 pub struct Status {
-    #[serde(rename = "samlp:StatusCode")]
+    #[serde(rename = "StatusCode")]
     pub status_code: StatusCode,
 }
 
@@ -133,15 +135,15 @@ pub struct X509Certificate {
 
 #[derive(Deserialize)]
 pub struct X509Data {
-    #[serde(rename = "ds:X509Certificate")]
+    #[serde(rename = "X509Certificate")]
     pub x509_certificate: X509Certificate,
 }
 
 #[derive(Deserialize)]
 pub struct KeyInfo {
     #[serde(rename = "xmlns:ds")]
-    pub ds: String,
-    #[serde(rename = "ds:X509Data")]
+    pub ds: Option<String>,
+    #[serde(rename = "X509Data")]
     pub x509_data: X509Data,
 }
 
@@ -171,7 +173,7 @@ pub struct Transform {
 
 #[derive(Deserialize)]
 pub struct Transforms {
-    #[serde(rename = "ds:Transform")]
+    #[serde(rename = "Transform")]
     pub transforms: Vec<Transform>,
 }
 
@@ -179,11 +181,11 @@ pub struct Transforms {
 pub struct Reference {
     #[serde(rename = "URI")]
     pub uri: String,
-    #[serde(rename = "ds:Transforms")]
+    #[serde(rename = "Transforms")]
     pub transforms: Transforms,
-    #[serde(rename = "ds:DigestMethod")]
+    #[serde(rename = "DigestMethod")]
     pub digest_method: DigestMethod,
-    #[serde(rename = "ds:DigestValue")]
+    #[serde(rename = "DigestValue")]
     pub digest_value: DigestValue,
 }
 
@@ -201,21 +203,23 @@ pub struct CanonicalizationMethod {
 
 #[derive(Deserialize)]
 pub struct SignedInfo {
-    #[serde(rename = "ds:CanonicalizationMethod")]
+    #[serde(rename = "CanonicalizationMethod")]
     pub canonicalization_method: CanonicalizationMethod,
-    #[serde(rename = "ds:SignatureMethod")]
+    #[serde(rename = "SignatureMethod")]
     pub signature_method: SignatureMethod,
-    #[serde(rename = "ds:Reference")]
+    #[serde(rename = "Reference")]
     pub reference: Reference,
 }
 
 #[derive(Deserialize)]
 pub struct Signature {
-    #[serde(rename = "ds:SignedInfo")]
+    #[serde(rename = "xmlns:ds")]
+    pub ds: Option<String>,
+    #[serde(rename = "SignedInfo")]
     pub signed_info: SignedInfo,
-    #[serde(rename = "ds:SignatureValue")]
+    #[serde(rename = "SignatureValue")]
     pub signature_value: SignatureValue,
-    #[serde(rename = "ds:KeyInfo")]
+    #[serde(rename = "KeyInfo")]
     pub key_info: KeyInfo,
 }
 
@@ -237,17 +241,17 @@ pub struct Assertion {
     pub version: String,
     #[serde(rename = "IssueInstant")]
     pub issue_instant: String,
-    #[serde(rename = "saml:Issuer")]
+    #[serde(rename = "Issuer")]
     pub issuer: Issuer,
-    #[serde(rename = "ds:Signature")]
+    #[serde(rename = "Signature")]
     pub signature: Option<Signature>,
-    #[serde(rename = "saml:Subject")]
+    #[serde(rename = "Subject")]
     pub subject: Subject,
-    #[serde(rename = "saml:Conditions")]
+    #[serde(rename = "Conditions")]
     pub conditions: Conditions,
-    #[serde(rename = "saml:AuthnStatement")]
+    #[serde(rename = "AuthnStatement")]
     pub authn_statement: AuthnStatement,
-    #[serde(rename = "saml:AttributeStatement")]
+    #[serde(rename = "AttributeStatement")]
     pub attribute_statement: AttributeStatement,
 }
 
@@ -268,14 +272,33 @@ pub struct Response {
     pub destination: String,
     #[serde(rename = "InResponseTo")]
     pub in_response_to: String,
-    #[serde(rename = "saml:Issuer")]
+    #[serde(rename = "Issuer")]
     pub issuer: Issuer,
-    #[serde(rename = "ds:Signature")]
+    #[serde(rename = "Signature")]
     pub signature: Option<Signature>,
-    #[serde(rename = "samlp:Status")]
+    #[serde(rename = "Status")]
     pub status: Status,
-    #[serde(rename = "saml:Assertion")]
+    #[serde(rename = "Assertion")]
     pub assertion: Assertion,
+}
+
+pub fn decode_authn_response(encoded: &str) -> Result<String> {
+    let deflated = base64::decode(encoded).map_err(|err| {
+        Error::InvalidResponse(format!("SAMLResponse is not encoded to base64: {}", err))
+    })?;
+    String::from_utf8(deflated).map_err(|err| {
+        Error::InvalidResponse(format!("SAMLResponse contains invalid chars: {}", err))
+    })
+}
+
+pub fn decode_inflate_authn_response(deflated_encoded: &str) -> Result<String> {
+    let deflated = base64::decode(deflated_encoded).map_err(|err| {
+        Error::InvalidResponse(format!("SAMLResponse is not encoded to base64: {}", err))
+    })?;
+    let mut inflater = DeflateDecoder::new(deflated.as_slice());
+    let mut inflated = String::new();
+    inflater.read_to_string(&mut inflated)?;
+    Ok(inflated)
 }
 
 impl IdentityProvider {
@@ -283,12 +306,11 @@ impl IdentityProvider {
         let response = from_xml_str::<Response>(xml)?;
         if let Some(signature) = response.signature.as_ref() {
             let cert = X509::from_pem(
-                signature
-                    .key_info
-                    .x509_data
-                    .x509_certificate
-                    .value
-                    .as_bytes(),
+                format!(
+                    "-----BEGIN CERTIFICATE-----\n{}\n-----END CERTIFICATE-----",
+                    signature.key_info.x509_data.x509_certificate.value
+                )
+                .as_bytes(),
             )?;
             let mut is_valid = false;
             for public_key in self.certificates.iter() {

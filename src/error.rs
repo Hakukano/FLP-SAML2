@@ -12,9 +12,9 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self {
-            Self::IOError(s) => write!(f, "Cannot create SP: {}", s),
-            Self::InvalidCert(s) => write!(f, "Cannot create SP: {}", s),
-            Self::InvalidResponse(s) => write!(f, "Cannot create SP: {}", s),
+            Self::IOError(s) => write!(f, "IO Error: {}", s),
+            Self::InvalidCert(s) => write!(f, "Invalid Cert: {}", s),
+            Self::InvalidResponse(s) => write!(f, "Invalid Response: {}", s),
         }
     }
 }
