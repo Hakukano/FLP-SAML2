@@ -100,7 +100,7 @@ pub struct SubjectConfirmation {
 #[derive(Deserialize)]
 pub struct NameID {
     #[serde(rename = "SPNameQualifier")]
-    pub sp_name_qualifier: String,
+    pub sp_name_qualifier: Option<String>,
     #[serde(rename = "Format")]
     pub format: String,
     #[serde(rename = "$value")]
@@ -232,9 +232,9 @@ pub struct Issuer {
 #[derive(Deserialize)]
 pub struct Assertion {
     #[serde(rename = "xmlns:xsi")]
-    pub xsi: String,
+    pub xsi: Option<String>,
     #[serde(rename = "xmlns:xs")]
-    pub xs: String,
+    pub xs: Option<String>,
     #[serde(rename = "ID")]
     pub id: String,
     #[serde(rename = "Version")]
