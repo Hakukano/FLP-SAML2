@@ -22,5 +22,6 @@ openssl = "0.10"
 quick-xml = { version = "0.22", features = [ "serialize" ] }
 rand = "0.8"
 regex = "1.4"
-serde = { version = "1.0", features = [ "derive" ] }
+serde = { version = "1.0", features = ["derive"] }
+serde_derive = "=1.0.171"
 url = "2.2"
